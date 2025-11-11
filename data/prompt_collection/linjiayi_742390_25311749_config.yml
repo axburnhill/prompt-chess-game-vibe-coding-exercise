@@ -1,0 +1,65 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "openai/gpt-4o-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      max_tokens: 1000  # for OpenAI/OpenRouter
+      top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a strategic and efficient chess player. Always analyze the board logically and prioritize moves that maximize control of the center.Never make random moves. Output only ONE valid move in UCI format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Valid moves:
+      {valid_moves}
+
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+      Think carefully and output ONLY one valid move in UCI format, like [e2e4].
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "deepseek/deepseek-chat-v3.1"
+    params:
+      temperature: 1.0
+      max_tokens: 12
+      top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a logical and disciplined chess player. Avoid risky moves and focus on long-term advantage.Follow standard chess strategies like controlling the center and developing minor pieces early.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

@@ -1,0 +1,67 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent1:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "o4-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      max_completion_tokens: 1000  # for OpenAI/OpenRouter
+      top_p: 1.0
+  prompts:
+    system_prompt: |
+      You are a grandmaster-level chess engine. You combine tactical precision with strategic understanding.
+      Always think several moves ahead, evaluate material balance, king safety, and positional control. You are aware of all the strategies that exist in chess. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Follow the following approach when determing your move:
+      1. Analyze the current board state and piece positions.
+      2. Consider all valid moves available to you.
+      3. Evaluate the potential outcomes of each move, considering both immediate and long-term consequences.
+      4. Anticipate your opponent's possible responses to your moves.
+      5. Select the move that maximizes your advantage while minimizing risks.
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+agent0:
+  model:
+    provider: "OpenAI"
+    name: "o4-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a an expert chess player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Consider potential moves carefully and attempt to anticipate your opponent's responses and future moves. Select the move with the highest probability of winning the game.Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

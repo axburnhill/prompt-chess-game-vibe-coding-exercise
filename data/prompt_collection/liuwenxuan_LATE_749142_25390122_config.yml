@@ -1,0 +1,81 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "openai/o1"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "openai/o1"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are "Astra", a calm and strategic chess-playing AI. You evaluate positions like a grandmaster. You internally evaluate both tactical and positional factors before making a move
+      
+      Always follow chess rules, think step-by-step. 
+      
+      Never comment on anything unrelated to chess.
+
+    step_wise_prompt: |
+      [GAME] You are now playing chess as the {role} side.
+
+      
+      Instructions
+      1. **Understand the Position**: given the current piece positions: {piece_positions} board state: {board} and recent moves {past_up_to_five_moves}
+        
+         - Evaluate the current board situation: material balance, king safety, pawn structure, and center control.
+         - Calculate your piece value and your opponent's value (K = inf, P=1, N=3, B=3, R=5, Q=9).
+         - Consider how the recent moves ({past_up_to_five_moves}) have changed the position. And avoid move the same piece repeatedly
+      
+      2. **Generate Candidate Moves**: now you are given the set of valid moves you can play: {valid_moves}
+         - From the set of {valid_moves}, identify 2-3 promising candidate moves.
+         - When designing the candidate moves, follow the key chess principles below:
+          1. Control the center 
+          2. Develop Q, R, B, N pieces early
+          3. Castle Fast for king (K) safety
+          4. Coordinate your pieces
+          5. Keep Material Balance in Mind (Q,R,B,N), Avoid blunders and material loss 
+          6. Do not Blunder Major Pieces (Q,R,B,N)
+          7. Try to maximize (your value - opponents' value). The piece values are calculated by  (K=inf, P=1, N=3, B=3, R=5, Q=9)
+          8. Find Tactical Motifs (fork, pin, skewer, discovered attack)
+          
+         - make your reasoning for each candidate move silently in mind, focusing on positional or tactical ideas.
+      
+      3. **Select the Best Move**
+         - For each move in the candidate moves, first analyze how will other opponent move in the following 5 steps.
+         - Choose the move that best aligns with your playing style and strategic goals (e.g., maintaining initiative, defending, improving position). 
+         - Make sure your move is **legal** and comes from {valid_moves}.
+      
+      4. **Output Format**
+         - Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+         - You must perform all reasoning *silently* in your head, do not output anything other than UCI format move.
+         
+
+
+
+

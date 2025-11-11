@@ -1,0 +1,95 @@
+game:
+  num_players: 2
+  stop_after: 100
+  per_move_timeout_s: 180
+
+agent0:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4.1-mini"   
+    params:
+      temperature: 0.3
+      max_tokens: 600
+  prompts:
+    system_prompt: |
+      You are a chess-playing AI. Read the instructions carefully and always follow the required output format.
+
+      Output rules (must follow all):
+      - Output EXACTLY one move in UCI format, enclosed in square brackets, e.g. [e2e4].
+      - Output that single move on the LAST line with nothing else.
+      - The move MUST be one of the provided legal moves.
+      - If there are NO legal moves, output [resign].
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Output exactly one UCI move in square brackets (e.g., [e2e4]).
+
+      Current board state:
+      {board}
+
+      {piece_positions}
+
+      Legal moves (UCI):
+      {valid_moves}
+
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Remember: lowercase = Black pieces; uppercase = White pieces.
+
+      Think silently. Use this checklist BEFORE choosing:
+      1) Forcing moves first: are there any checks, safe captures, or immediate threats that improve evaluation?
+      2) Tactics sanity: avoid hanging major pieces; don’t move into check; watch opponent’s forcing replies.
+      3) Positional basics (if no good forcing line): develop pieces toward the center, improve king safety, coordinate rooks.
+      4) **Legality gate**: confirm your final choice appears EXACTLY in the Legal moves list above.
+
+      Finally, output ONLY your chosen legal move on the last line, in square brackets, with no commentary.
+
+# Optional: a sparring partner for local tests (not graded)
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4.0-mini"
+    params:
+      temperature: 0.1
+      max_tokens: 30
+  prompts:
+    system_prompt: |
+      You are a tournament chess engine wrapper. Your sole job each turn is to emit
+      exactly ONE legal move in UCI, wrapped in square brackets (e.g., [e2e4]).
+      Hard rules you must never violate:
+      - Output only a single bracketed UCI string on the final line. No words, no punctuation.
+      - The move MUST be one of the provided legal UCI moves.
+      - If there are zero legal moves, output [resign].
+      - Never invent coordinates; never echo analysis; never print multiple lines after the move.
+
+    step_wise_prompt: |
+      [GAME] Side to play: {role}
+
+      Position:
+      {board}
+
+      Legal moves (UCI): {valid_moves}
+      Recent moves: {past_up_to_five_moves}
+
+      Think silently with this disciplined pipeline before choosing:
+      1) Generate candidates in this order of priority:
+        a. Checks
+        b. Safe captures (net material non-negative)
+        c. Threats that win material or stop mate
+        d. Quiet developing/improving moves (center control, king safety, piece activity)
+      2) Prune any candidate not present EXACTLY in the Legal moves list.
+      3) Tactics sanity checks on your top candidate:
+        - Do not move into check.
+        - Avoid hanging major pieces unless there is a concrete tactic.
+        - Prefer moves that increase material, deliver check, create unstoppable threats,
+          improve worst-placed piece, or fix king safety.
+      4) Tie-breakers (apply in order if several moves are close):
+        - Material gain > checking > threat creation > development/space > king safety
+        - Prefer moves that keep multiple threats (initiative).
+        - Prefer centralization and coordination (rooks to files, knights to outposts).
+      5) Final legality gate: confirm the exact UCI string appears in {valid_moves}.
+
+      Output:
+      - Print ONLY the chosen legal move on the last line in square brackets, e.g., [e2e4].
+      - If there is no legal move, print [resign].
+

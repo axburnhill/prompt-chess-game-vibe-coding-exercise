@@ -1,0 +1,63 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-4o-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.3
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format. 
+      You are a careful and defensive chess agent. Always prioritize king safety, strong pawn structure, and solid development.
+      Play rationally, avoid unnecessary risks, and favor safe, positionally sound moves.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      Think cautiously. If your king is threatened, fix that first.
+      Prefer solid moves that maintain control, avoid hanging pieces, and aim for long-term stability.
+
+      Current board state:
+      {board}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

@@ -1,0 +1,78 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-5-mini"
+    # Parameters passed to the model API
+    params:
+      # temperature: 0.6
+      reasoning_effort: medium
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive, expert game player playing chess. Chess is a classic two-player strategy board game contested on an 8 * 8 board. Each side commands sixteen pieces (King, Queen, Rooks, Bishops, Knights, and Pawns) and aims to **checkmate** the opponent's King.
+      - **Piece Representation:** White pieces are denoted by uppercase letters (K, Q, R, B, N, P), while black pieces use lowercase letters (k, q, r, b, n, p).
+      - **Action Space:** Moves are written in Universal Chess Interface (UCI) format inside brackets: `[start end]`. For example, `[e2e4]` advances a pawn from *e2* to *e4*; `[g1f3]` moves the knight from *g1* to *f3*.
+      - **Chess Rules:** Bishops (B) move diagonally. Rooks (R) move horizontally or vertically. Knights (N) jump in an L-shape. Queens (Q) combine rook and bishop movement. Kings (K) move one square in any direction. Pawns (P) move forward, capture diagonally, and can promote.
+      - **Aiming to Win:** You must thoroughly analyze the position and play with utmost caution. When you have the advantage, press it relentlessly and aim for a swift checkmate. Carefully evaluate every move to eliminate any chance of a counterplay or draw by your opponent. When at a disadvantage, strive to turn the tide and win if possible. If victory is unattainable, exhaust all possible means to force a draw. Meticulously analyze legal moves, then select the absolute best one. You need to determine whether you are playing as Black or White. Then, you need to observe the positions of your pieces and choose one of your own pieces to move; make sure that your move follows the rules of chess. Considering the long-term strategy and short-term tactic. Analyze the position carefully. You may think through the position and consider multiple candidate moves before deciding on your final move.
+
+    step_wise_prompt: |
+      You are playing as {role} in this game of Chess. Make your move in this step in the UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      ### Current piece positions
+
+      White pieces are denoted by uppercase letters (K, Q, R, B, N, P), while black pieces use lowercase letters (k, q, r, b, n, p).
+
+      {piece_positions}
+
+      ### Recent moves (up to 5) for reference
+
+      {past_up_to_five_moves}
+
+      ### Instructions
+
+      Make a **legal** move in the current board state to maximize your chances of winning! You can first reason hard about possible moves considering future consequences, and then provide your chosen move in UCI format on the last line as your final answer. The following moves are legal for you in this turn:
+      {valid_moves}
+
+agent1:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-4.1-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.6
+      # reasoning_effort: low
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive game player playing chess. Chess is a classic two-player strategy board game contested on an 8 * 8 board. Each side commands sixteen pieces (King, Queen, Rooks, Bishops, Knights, and Pawns) and aims to **checkmate** the opponent's King.
+      - **Piece Representation:** White pieces are denoted by uppercase letters (K, Q, R, B, N, P), while black pieces use lowercase letters (k, q, r, b, n, p).
+      - **Action Space:** Moves are written in Universal Chess Interface (UCI) format inside brackets: `[start end]`. For example, `[e2e4]` advances a pawn from *e2* to *e4*; `[g1f3]` moves the knight from *g1* to *f3*.
+
+    step_wise_prompt: |
+      You are playing as {role} in this game of Chess. Make your move in this step in the UCI format enclosed in square brackets (e.g., [e2e4]).
+
+      ### Current board state
+
+      White pieces are denoted by uppercase letters (K, Q, R, B, N, P), while black pieces use lowercase letters (k, q, r, b, n, p).
+
+      {board}
+      
+      ### Current piece positions
+
+      {piece_positions}
+
+      ### Recent moves (up to 5) for reference
+
+      {past_up_to_five_moves}
+
+      ### Instructions
+
+      Make a **legal** move in the current board state to maximize your chances of winning! You can first reason hard about possible moves considering future consequences, and then provide your chosen move in UCI format on the last line as your final answer. The following moves are legal for you in this turn:
+      {valid_moves}

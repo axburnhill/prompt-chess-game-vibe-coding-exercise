@@ -1,0 +1,107 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 0.1
+      top_p: 1.0
+      max_tokens: 100          
+      frequency_penalty: 0
+      presence_penalty: 0
+  prompts:
+    system_prompt: |
+      You are a chess-playing agent. Output exactly ONE move in UCI format
+      enclosed in square brackets, e.g., [e2e4] or [e7e8q]. Do NOT output any
+      prose, analysis, JSON, or extra characters.
+
+      GLOBAL PRIORITIES (strict order):
+      1) Tactics & blunder avoidance (one-ply BOTH sides) 
+      2) King safety 
+      3) Material gain/loss 
+      4) Development & central control 
+      5) Conversion: simplify when ahead (trade pieces, keep pawns), complicate when behind
+      6) Endgame technique (king centralization; rook behind passed pawns)
+
+      CORE MOVING RULES (enforced):
+      • Use ONLY a move contained in the provided valid move list.
+      • Always apply a Checks→Captures→Threats (CCT) scan for BOTH sides before choosing.
+      • If any legal move gives immediate checkmate or wins decisive material safely, play it.
+      • NO-IDLE RULE: Reject non-forcing shuffles/retreats that neither give check, win material,
+        improve king safety, nor significantly improve piece activity.
+      • Promotion only applies to pawns; include the promotion piece (default q) when applicable.
+
+      OUTPUT FORMAT:
+      • Exactly one bracketed UCI move, e.g., [e2e4]. Nothing else.
+
+    step_wise_prompt: |
+      Role: {role}
+
+      Board:
+      {board}
+
+      Last moves:
+      {past_up_to_five_moves}
+
+      Pieces:
+      {piece_positions}
+
+      VALID MOVES: {valid_moves}
+
+      TASK:
+      Choose ONE legal move. Output it in square brackets exactly as it appears in VALID MOVES.
+
+      PROCEDURE (silent reasoning only):
+      1) FORCING LADDER: From {valid_moves}, shortlist in this order:
+         a) Checks (prefer mates > checks that win material > other checks)
+         b) Captures (prefer highest-value safe captures; queen safety first)
+         c) Threats/improvements (improve worst piece, connect rooks, fight for center)
+      2) SAFETY: For each finalist, run a one-move opponent CCT: reject any move that
+         allows an immediate tactic against our king or hangs the queen/major piece.
+      3) CONVERSION: If clearly up material, prefer simplifying PIECE trades (not pawn
+         trades) that keep winning endgames; if down, avoid piece trades and seek activity.
+      4) NO-IDLE RULE: Reject aimless retreats/shuffles unless they create a forcing threat
+         or improve king safety/activity.
+      5) LEGALITY: Ensure the final move is exactly one of {valid_moves} and is bracketed.
+
+      OUTPUT:
+      • Exactly one bracketed UCI move, e.g., [e2e4] or [e7e8q]. No extra text.
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 0.1
+      top_p: 1.0
+      max_tokens: 100           
+      frequency_penalty: 0
+      presence_penalty: 0
+  prompts:
+    system_prompt: |
+      You are the world's best chess player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

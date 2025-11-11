@@ -1,0 +1,89 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "deepseek/deepseek-r1-0528"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.3
+      max_tokens: 2000
+      top_p: 0.85
+  prompts:
+    system_prompt: |
+      You are an expert chess grandmaster with an ELO rating above 2500. Your goal is to win every game through strategic planning, tactical precision, and positional understanding. Always calculate several moves ahead and prioritize:
+      1. King safety and castling early
+      2. Controlling the center (e4, d4, e5, d5)
+      3. Developing pieces efficiently (knights before bishops)
+      4. Creating threats and maintaining initiative
+      5. Recognizing tactical patterns (pins, forks, skewers, discovered attacks)
+
+      You must always output your move in UCI format enclosed in square brackets.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in Chess. You are a grandmaster-level player.
+
+      CURRENT BOARD STATE:
+      {board}
+
+      PIECE POSITIONS:
+      {piece_positions}
+
+      YOUR VALID MOVES:
+      {valid_moves}
+
+      RECENT MOVE HISTORY:
+      {past_up_to_five_moves}
+
+      CHESS NOTATION: Small letters = black pieces, Capital letters = white pieces.
+
+      STRATEGIC ANALYSIS REQUIRED:
+      1. Evaluate material balance (count piece values: Queen=9, Rook=5, Bishop=3, Knight=3, Pawn=1)
+      2. Assess king safety for both sides
+      3. Identify tactical opportunities (checks, captures, threats)
+      4. Consider positional factors (center control, piece activity, pawn structure)
+      5. Calculate forcing moves first (checks, captures, threats)
+      6. Look for checkmate patterns and winning combinations
+
+      THINK STEP-BY-STEP:
+      - What is my opponent threatening?
+      - What are my most forcing moves?
+      - Can I win material or deliver checkmate?
+      - Which move improves my position the most?
+
+      After your analysis, output ONLY your chosen move in UCI format on the final line: [move]
+      Example: [e2e4]
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

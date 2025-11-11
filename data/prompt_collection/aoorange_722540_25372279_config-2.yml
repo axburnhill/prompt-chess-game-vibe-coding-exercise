@@ -1,0 +1,116 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+################################################################
+### ======================== MEMO ========================== ###
+# INFO Run completed for match abb13d02-f5cb-4fe5-9a83-ede6ad66c4c6 and game white_player_agent0
+# Match abb13d02-f5cb-4fe5-9a83-ede6ad66c4c6 completed!
+# Game time: 3543.88 seconds
+# Results saved in: ./Results/abb13d02-f5cb-4fe5-9a83-ede6ad66c4c6/
+### ======================================================== ###
+# agent0:
+#   model:
+#     provider: "Gemini" # OpenAI, OpenRouter, or Gemini
+#     name: "gemini-2.5-flash"
+#     # Parameters passed to the model API
+#     params:
+#       temperature: 1.0
+#       # max_tokens: 1000  # for OpenAI/OpenRouter
+#       # top_p: 0.9
+#   prompts:
+#     system_prompt: |
+#       You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+#     step_wise_prompt: |
+#       [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+#       Current board state:
+#       {board}
+      
+#       Recent moves:
+#       {past_up_to_five_moves}
+      
+#       Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+################################################################
+
+################################################################
+### ======================== MEMO ========================== ###
+# INFO Run completed for match 78fbbc6a-8bc3-490d-8b88-1d5da84ce84b and game white_player_agent0
+# Match 78fbbc6a-8bc3-490d-8b88-1d5da84ce84b completed!
+# Game time: 3573.78 seconds
+# Results saved in: ./Results/78fbbc6a-8bc3-490d-8b88-1d5da84ce84b/
+### ======================================================== ###
+agent0:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-5-mini-2025-08-07"
+    # Parameters passed to the model API
+    params:
+      temperature: 1 ## chess is more about deterministic logic, should be more “statistically disciplined.”
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive but calmly disciplined game player who always looks both backward and forward before making each move. Make sure you read the game instructions carefully, and always follow the required format.
+    ## think back + forward
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]). 
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+      
+      Recent moves:  
+      {past_up_to_five_moves}
+
+      Valid moves: 
+      {valid_moves}
+
+      Follow this checklist silently:
+      1) Sanity: never hang your king or a major piece; avoid immediate tactical refutation.
+      2) Tactics first: mate threats, checks, captures, and forcing moves. If a forcing move clearly wins material or mates, prefer it.
+      3) Two-step probe (“p1 -> p2”):
+         - p1 := your rough win chance now (qualitative, don't print numbers).
+         - For each top candidate in Valid moves, imagine opponent's strongest reply.
+         - p2 := your rough win chance after that reply.
+         - Prefer the move with the best p2 (expected value after opponent's best reply).
+      4) Horizon: the game ends after 100 plies total. Prioritize lines that secure durable advantages (passed pawns, material up, winning endgames) over long speculative attacks.
+      5) Tie-breakers: king safety > piece activity > passed pawns > space > pawn structure.
+      6) Clock discipline: if a move is obviously safe and good, do not overthink.
+      7) Strict legality: choose only from Valid moves.
+
+      Remember you are playing as {role}. Make sure your moves are legal moves in the current board state.
+################################################################
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-5-mini-2025-08-07"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+

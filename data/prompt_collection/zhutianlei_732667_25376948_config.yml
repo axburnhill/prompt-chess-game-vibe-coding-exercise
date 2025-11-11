@@ -1,0 +1,118 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+# ============================================================
+# OPTIMIZED CONFIGURATION FOR COMPETITION
+# ============================================================
+agent0:
+  model:
+    provider: "OpenRouter"
+    name: "deepseek/deepseek-chat-v3.1"  # Fast, strong, cost-effective
+    params:
+      temperature: 0.65  # Balanced temperature
+
+  prompts:
+    system_prompt: |
+      You are a grandmaster chess player competing to win. Follow these principles:
+
+      CRITICAL RULES:
+      1. Always output moves in UCI format: [e2e4]
+      2. Choose ONLY from the valid moves list provided
+      3. Every move must be in square brackets
+
+      STRATEGY:
+      - Control the center (e4, d4, e5, d5)
+      - Develop knights before bishops
+      - Castle early for king safety
+      - Look for tactical opportunities (forks, pins, skewers)
+      - Calculate 2-3 moves ahead
+      - Create threats that force opponent responses
+
+      FORMAT: End your response with [UCI_move] on the last line.
+
+    step_wise_prompt: |
+      === CHESS POSITION ANALYSIS ===
+
+      You are playing as {role} in a competitive chess game.
+
+      CURRENT BOARD:
+      {board}
+
+      ALL PIECES ON BOARD:
+      {piece_positions}
+
+      YOUR LEGAL MOVES (choose from this list):
+      {valid_moves}
+
+      RECENT GAME HISTORY:
+      {past_up_to_five_moves}
+
+      === DECISION FRAMEWORK ===
+
+      Step 1 - THREATS:
+      - Is my king in danger?
+      - What is my opponent threatening?
+      - Can my opponent capture any undefended pieces?
+
+      Step 2 - OPPORTUNITIES:
+      - Can I give check?
+      - Can I capture opponent pieces?
+      - Can I create a fork (attack 2+ pieces)?
+      - Can I pin or skewer?
+
+      Step 3 - POSITIONAL:
+      - Should I develop a piece?
+      - Should I castle?
+      - Can I control center squares?
+      - Can I improve piece placement?
+
+      Step 4 - CALCULATION:
+      List 2-3 candidate moves from the legal moves above and evaluate:
+      - Move A: [UCI] - Pros/Cons
+      - Move B: [UCI] - Pros/Cons
+      - Best choice: [UCI]
+
+      IMPORTANT REMINDERS:
+      - Lowercase letters (p, n, b, r, q, k) = Black pieces
+      - Uppercase letters (P, N, B, R, Q, K) = White pieces
+      - You MUST select from the legal moves list
+      - Format: [e2e4] with square brackets
+
+      [Your analysis here]
+
+      Final answer: [your_move]
+
+
+# ============================================================
+# AGENT1 - Testing opponent
+# ============================================================
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 0.7
+
+  prompts:
+    system_prompt: |
+      You are a strong chess player. Make smart, legal moves to win.
+      Always output in format: [e2e4]
+
+    step_wise_prompt: |
+      Playing as {role}
+
+      Board:
+      {board}
+
+      Pieces:
+      {piece_positions}
+
+      Legal moves:
+      {valid_moves}
+
+      History:
+      {past_up_to_five_moves}
+
+      Analyze and choose your best legal move. Format: [move]

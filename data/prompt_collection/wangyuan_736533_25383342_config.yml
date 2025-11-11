@@ -1,0 +1,73 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter"
+    name: "google/gemini-2.5-flash"
+    params:
+      temperature: 0.7   # 建议略降，提升稳定与规则遵守
+  prompts:
+    system_prompt: |
+      You are a disciplined chess engine wrapper. Your sole job is to choose exactly ONE legal move per turn from the provided valid move list. 
+      Follow move-format rules strictly and never output commentary or explanations.
+
+    step_wise_prompt: |
+      Role: {role}
+      Current board (FEN-like view):
+      {board}
+
+      Valid moves (UCI): {valid_moves}
+      Recent moves: {past_up_to_five_moves}
+
+      Decision policy (apply in order, stop at the first tie-break that distinguishes):
+      1) Tactics first (CCT): prefer CHECKMATES > CHECKS > CAPTURES > strong THREATS.
+      2) Material safety: avoid hanging pieces; if capturing, prefer safest recaptures; avoid tactics that lose material immediately.
+      3) King safety & blunder check: do not allow immediate mate or large forced loss next turn.
+      4) Development & activity: improve worst piece, increase central control, activate rooks/queens when safe.
+      5) Endgame bias: in simplified positions, prefer passed pawns and king activity, avoid unnecessary pawn weaknesses.
+      6) Tie-breaks: 
+         - prefer moves improving evaluation by material/safety,
+         - prefer developing/space-gaining moves,
+         - otherwise choose the lexicographically first move among remaining candidates to be deterministic.
+
+      Output rules (CRITICAL):
+      - Choose ONLY from the provided valid UCI list: {valid_moves}.
+      - Output EXACTLY ONE move in UCI format enclosed in square brackets, e.g., [e2e4].
+      - Do NOT add any text, code fences, punctuation, or commentary.
+      - If and only if there are NO legal moves (checkmate or stalemate), output [0000].
+
+      Final answer: output the single move now, in brackets.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

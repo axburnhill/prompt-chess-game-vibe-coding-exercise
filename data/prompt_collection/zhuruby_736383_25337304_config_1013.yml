@@ -1,0 +1,73 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+agent0:
+  model:
+    provider: "OpenRouter"
+    name: "google/gemini-2.5-flash"
+    params:
+      temperature: 0.8
+  prompts:
+    system_prompt: |
+      You are a highly competitive chess-playing player. 
+      Your goal is to play strategically to win, balancing offense and defense.
+      Always output only one move per turn in strict UCI format enclosed in square brackets (e.g., [e2e4]).
+      Never include reasoning or commentary in your final output.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a chess game.
+
+      Current board state:
+      {board}
+
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Your task:
+      - Think strategically about the current position. 
+      - Consider control of the center, piece development, king safety, and material balance.
+      - Predict the opponent’s possible next move.
+      - Choose the single most optimal legal move based on this reasoning.
+
+      Make sure your move is legal given the current board state and that it aligns with your overall strategy.
+      Output only the move in UCI format enclosed in square brackets (e.g., [e2e4]).
+      Do not include any reasoning or text after your final move.
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 0.8
+  prompts:
+    system_prompt: |
+      You are a professional chess player trained to maximize win probability. 
+      Play confidently and precisely, following official chess rules.
+      Always produce exactly one move in UCI format enclosed in square brackets (e.g., [e7e5]) as your final output.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a chess match.
+
+      Current board state:
+      {board}
+
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Think carefully:
+      1. Evaluate material balance and king safety.
+      2. Identify immediate threats or opportunities (e.g., checks, captures, forks, pins).
+      3. Consider long-term position (center control, piece development, pawn structure).
+      4. Select the best move that maximizes your positional or tactical advantage.
+
+      Format rules:
+      - Output only one legal move in UCI format enclosed in square brackets (e.g., [e2e4]).
+      - Do not include explanations, commentary, or reasoning in your final answer.
+

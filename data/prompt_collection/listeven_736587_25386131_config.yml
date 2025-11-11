@@ -1,0 +1,79 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+# uv run regular_chess.py
+agent0:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-4o-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.2
+      max_tokens: 60  # for OpenAI/OpenRouter
+      #top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a grandmaster-level chess player. Make sure you read the game instructions carefully, and always follow the required format.
+
+      Your goal is to play the strongest possible moves while following sound chess principles:
+      - Maintain king safety.
+      - Balance positional and tactical play.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      Think step by step silently:
+      1. Assess threats to your king and pieces.
+      2. Identify tactical opportunities.
+      3. Consider long-term positional plans.
+      4. Think about potential strategies like forks, pins, or sacrifices, etc.
+      5. Think about all the moves in {valid_moves}.
+      6. Select the best move in [UCI_MOVE] format.
+
+      Return ONLY the move in [UCI_MOVE] format, make sure the move is valid in {valid_moves}.
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

@@ -1,0 +1,79 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+agent0:
+  model:
+    provider: "OpenRouter"
+    name: "google/gemini-2.5-flash-preview-09-2025"
+    params:
+      temperature: 0.4  # lower temperature = more stable and legal moves
+      top_p: 0.9
+
+  prompts:
+    system_prompt: |
+      You are a professional chess player competing in a head-to-head tournament. 
+      You must always play legal and logical moves, follow game rules precisely, 
+      and output your final move **only in UCI format** enclosed in square brackets (e.g., [e2e4]).
+      Never break format or include commentary after the move.
+      Before outputting the final move, think carefully through the position and reasoning internally.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. 
+      Output exactly one move in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Legal moves:
+      {valid_moves}
+
+      ### Think Step by Step (internal reasoning, do not mention it explicitly in the final output):
+      1. Evaluate the board position (material balance, king safety, piece activity, pawn structure, threats).
+      2. Consider the opponent’s possible replies.
+      3. List and mentally score 2–3 of the best candidate moves from {valid_moves}.
+      4. Choose the move that maximizes position strength and long-term advantage.
+      5. Ensure the move is legal and consistent with {role}’s color.
+      
+      ### Output Requirement:
+      - Provide only one move, in correct UCI format, enclosed in square brackets.
+      - Do NOT include explanation or reasoning after output.
+
+
+agent1:
+  model:
+    model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "google/gemini-2.5-flash-preview-09-2025"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

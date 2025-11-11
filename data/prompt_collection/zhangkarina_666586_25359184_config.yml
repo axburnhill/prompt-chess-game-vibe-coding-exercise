@@ -1,0 +1,68 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-4o-mini"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.7 #1.0
+      max_tokens: 64 #1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a diligent competitive Chess player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+      
+      First think about possible moves to optimize your chances of winning. Always choose the strongest move to maximize your chances. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "google/gemini-2.5-flash"
+    params:
+      temperature: 0.4 #1.0
+      max_tokens: 64
+  prompts:
+    system_prompt: |
+      You are a decent Chess player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      Choose a legal move that improves your chances of winning in UCI format on the last line as your final answer.
+
+

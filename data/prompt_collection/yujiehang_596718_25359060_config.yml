@@ -1,0 +1,64 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+agent0:
+  model:
+    provider: "OpenAI"
+    name: "gpt-5-mini"
+    params:
+      temperature: 1.0
+      top_p: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive chess agent. Your sole goal is to maximize your probability of winning the game.
+      You must output exactly ONE legal move in UCI format enclosed in square brackets, e.g., [e2e4].
+      Never include any commentary, punctuation, or text outside the brackets.
+      Think silently; do not reveal reasoning.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role}. Output ONE legal move in UCI format (e.g., [e2e4]) and nothing else.
+
+      Current board (FEN-like):
+      {board}
+
+      Valid moves:
+      {valid_moves}
+
+      Recent moves:
+      {past_up_to_five_moves}
+
+      Objective:
+      - Maximize your winning probability by selecting the move that most improves your side’s evaluation.
+      - Before choosing, silently analyze short tactical sequences (checks, captures, threats) up to 3 plies.
+      - Prefer forcing lines that lead to checkmate, material gain, or positional dominance.
+      - Avoid moves that immediately lose material, expose your king, or allow forced mates.
+      - In endgames, prioritize pawn promotion and king activity while avoiding stalemate.
+      - Output ONLY your chosen move in brackets, e.g., [g1f3].
+
+
+# agent1:
+#   model:
+#     provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+#     name: "google/gemini-2.5-flash"
+#     # Parameters passed to the model API
+#     params:
+#       temperature: 1.0
+#       # max_tokens: 1000  # for OpenAI/OpenRouter
+#       # top_p: 0.9
+#   prompts:
+#     system_prompt: |
+#       You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+#     step_wise_prompt: |
+#       [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+#       Current board state:
+#       {board}
+      
+#       Recent moves:
+#       {past_up_to_five_moves}
+      
+#       Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+

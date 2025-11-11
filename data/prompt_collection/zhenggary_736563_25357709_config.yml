@@ -1,0 +1,84 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter"               # We’ll route via OpenRouter
+    # Pick one of the allowed models. Example: google/gemini-2.5-flash
+    name: "google/gemini-2.5-flash"
+    params:
+      temperature: 0.5                
+      top_p: 0.9
+      max_tokens: 256                    # one move + brief reasoning if agent prints it
+      # You can add other kwargs accepted by OpenRouter/OpenAI-style APIs:
+      presence_penalty: 0.0
+      frequency_penalty: 0.0
+  prompts:
+    system_prompt: |
+      You are a chess move engine that ALWAYS outputs exactly one legal move
+      in UCI format enclosed in square brackets, e.g., [e2e4].
+      Do NOT speak, explain, or add extra text—only the bracketed move.
+      Constraints:
+      - Only choose from the provided {valid_moves}.
+      - Never output anything except a single bracketed UCI string.
+      - If there is exactly one legal move, output it.
+      - If promotion is needed, always specify the promotion piece (prefer 'q' unless a different piece clearly wins material or mates).
+      - Respect the 3-minute per-move budget (be decisive; no long “thinking”).
+      Priorities (in order):
+      1) Forced mate > avoid being mated.
+      2) Captures winning material (consider recaptures).
+      3) Checks and strong forcing moves.
+      4) Improve piece activity, control center, king safety, and development.
+      5) Avoid blunders: hanging pieces, back-rank mates, simple forks/pins/skewers.
+      Tiebreak heuristics: prefer moves that keep options flexible, create multiple threats,
+      and don’t overextend your king or queen early.
+    step_wise_prompt: |
+      [ROLE] You are playing as {role}.
+      [BOARD]
+      {board}
+
+      [PIECES]
+      {piece_positions}
+
+      [LAST UP TO 5 MOVES]
+      {past_up_to_five_moves}
+
+      [VALID MOVES SET]
+      {valid_moves}
+
+      Select EXACTLY ONE move from {valid_moves} and output it in UCI inside square brackets.
+      DO NOT include any other text. Examples: [e2e4], [g1f3], [e7e8q].
+      Remember: output ONLY the bracketed move and nothing else.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

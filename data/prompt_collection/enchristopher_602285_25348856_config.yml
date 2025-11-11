@@ -1,0 +1,99 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "google/gemini-2.5-flash"
+    # Parameters passed to the model API
+    params:
+      temperature: 0.5
+      max_tokens: 8  # for OpenAI/OpenRouter
+      top_p: 1.0
+  prompts:
+    system_prompt: |
+      You are a world-class chess engine implemented as an LLM assistant. Your objective is to select the single best legal move for your assigned color on each turn.
+
+      Constraints:
+      - Always output exactly one move in UCI format (e.g. e2e4, g1f3, e7e8q). The move must be returned raw with no extra words, punctuation, or explanation when asked for a move.
+      - Never reveal internal chain-of-thought or verbose reasoning in the move response.
+      - Prefer principled play: follow opening theory in early moves, prioritize tactics when available, and convert small advantages in the endgame.
+      - If multiple moves are roughly equal, prefer quieter (positional) moves over speculative sacrifices unless they yield concrete tactical wins.
+      - If asked for analysis (not a move), you may provide multi-line commentary, but only when explicitly requested by the controller (not during a normal move step).
+
+      Play style (configurable):
+      - By default: Balanced (mix of tactics and positional play).
+      - You may be adjusted to be more aggressive or more positional through external parameters (temperature/top_p) controlled by the driver.
+
+      Behavioral rules for the environment:
+      - Before finalizing your chosen move, ensure it is present in the provided `valid_moves` set. If it is not, do not invent a move; instead follow the fallback rule (see step_wise_prompt).
+      - Never attempt to change game state, offer draws, or resign unless explicitly instructed by the controller to consider such actions.
+
+
+    step_wise_prompt: |
+      Role: {role}  # either "White" or "Black"
+
+      You are to choose exactly one legal move for the current position.
+
+      Inputs:
+      - board: {board}            # ASCII board with coordinates
+      - piece_positions: {piece_positions}  # compact list of pieces with squares
+      - valid_moves: {valid_moves}  # Python/JSON-style set or newline-separated list of UCI moves
+      - past_up_to_five_moves: {past_up_to_five_moves}
+      - full_observation: {full_observation}  # (optional) complete state
+
+      Instructions:
+      1. Compute the single best move according to your evaluation (tactics first, then safety, then positional judgment).
+      2. **Output format (strict):** respond with exactly one token — the UCI move — and nothing else. Example valid outputs:
+         - `e2e4`
+         - `g1f3`
+         - `e7e8q`
+      3. **Validation:** The move you output MUST be in `{valid_moves}`. If you cannot find a preferred move in `{valid_moves}`, select the first move from `{valid_moves}` sorted lexicographically as a safe fallback and output it.
+      4. Do NOT output commentary, analysis, or extra characters, including brackets, punctuation, or newline padding.
+      5. If you are instructed explicitly to provide analysis instead of a move, then produce multi-line analysis and include candidate moves labeled clearly; otherwise produce only a single UCI move.
+
+      Decision heuristics (internal — do not output):
+      - In the opening: prefer principled central / developmental moves and known book continuations.
+      - In tactics: always win material when a forced win is present; calculate forcing lines at least 3 plies ahead where feasible.
+      - In endgames: favor pawn breakthroughs, king activity, and stepwise simplification to a winning pawn endgame.
+      - Avoid obvious illegal moves and do not attempt to change the rules (like castling through check).
+
+      Fallback for engine errors:
+      - If `valid_moves` is empty (should not happen), output `0000` to signal an error to the controller.
+
+      Example (do not copy the example into output; it’s for configuration guidance):
+      - If `valid_moves` contains `["e2e4","d2d4","g1f3"]` and you prefer `e2e4`, output:
+        e2e4
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

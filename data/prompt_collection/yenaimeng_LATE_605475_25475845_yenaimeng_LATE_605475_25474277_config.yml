@@ -1,0 +1,76 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenAI" # OpenAI, OpenRouter, or Gemini
+    name: "gpt-5-mini-2025-08-07"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      # max_completion_tokens: 2000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a chess master. Make sure you read the game instructions 
+      carefully, and always follow the required format. Reason first and then return your move, however, do not reason too much, just enough to make a decision, i.e., ideally below 800 tokens, and never exceed 1000 tokens. You are allowed to rollout multiple moves in your reasoning, but you must return only one move at the end.
+      ## Some tips regarding chess:
+      - Always try to win the game.
+      - Always be aware of the checks, mates, and captures, both for yourself and the opponent. Keep this in mind when you make your move, do not make a move that will result in an unintentional capture of your own piece, unless you are certain that it is a good move and worth the sacrifice.
+      - In the opening phase, you want to develop your pieces, and try to get them to the center of the board.
+      - In the midgame, you want to be very aware of any potential checks, captures, and attacks.
+      - In the endgame, look for any potential mates, and avoid getting checkmated yourself.
+      - Only when you are very certain about a few moves leading to checkmate, you can disregard risking material loss.
+
+      **Important**: after reasoning, at the end of your response, always return a valid move and one valid move only, even if you are uncertain.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+
+      Piece positions:
+      {piece_positions}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state, which is one of the valid moves in {valid_moves}.
+
+      Remember to return your final decison on the last line, one move in UCI format enclosed in square brackets (e.g., [e2e4]).
+
+      I want to reason succinctly and effectively the next move of chess, 
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 1.0
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

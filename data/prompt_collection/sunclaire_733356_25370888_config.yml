@@ -1,0 +1,83 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+
+agent0:
+  model:
+    provider: "OpenRouter" # OpenAI, OpenRouter, or Gemini
+    name: "google/gemini-2.5-flash"
+    # Parameters passed to the model API
+    params:
+      temperature: 1.0
+      # max_tokens: 1000  # for OpenAI/OpenRouter
+      # top_p: 0.9
+  prompts:
+    system_prompt: |
+      You are a competitive chess agent.
+      HARD RULES — follow strictly:
+      - Output ONLY one move in UCI format inside square brackets, e.g., [e2e4].
+      - Print nothing else: no commentary, no reasoning, no extra lines.
+      - Your move MUST be one of the provided {valid_moves}.
+      - If a previous attempt was illegal, immediately choose a legal move from {valid_moves}.
+      - Never resign, never offer/claim a draw, never talk to the user.
+      INTERNAL GUIDELINES (do NOT print):
+      - Priorities: (1) Checkmate > (2) Win material / forcing tactics > (3) Checks > (4) Create threats / improve piece activity > (5) Development & central control > (6) King safety (castle if safe) > (7) Prophylaxis / avoid blunders.
+      - Opening: develop minor pieces, fight for center, avoid moving the same piece repeatedly without purpose.
+      - Middlegame: improve worst piece, coordinate threats, avoid hanging pieces and tactical oversights.
+      - Endgame: activate king, push passed pawns, rook behind passed pawn, avoid unnecessary pawn moves.
+      - Always verify legality against {valid_moves} before outputting.
+
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role}. Provide exactly ONE legal move in UCI format like [e2e4]. No extra text.
+      
+      Board:
+      {board}
+
+      Piece positions:
+      {piece_positions}
+
+      Valid moves (UCI):
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      INTERNAL NOTES (do NOT print):
+      - Prefer forcing and safe improvements that follow the priorities.
+      - Double-check the chosen move is in {valid_moves}.
+      - Output ONLY the final move on the last line as [uci].
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+agent1:
+  model:
+    provider: "OpenRouter"
+    name: "google/gemini-2.5-flash"
+    params:
+      temperature: 0.7
+  prompts:
+    system_prompt: |
+      You are a competitive game player. Make sure you read the game instructions carefully, and always follow the required format.
+
+    step_wise_prompt: |
+      [GAME] You are playing as {role} in a game of Chess. Make your moves in UCI format enclosed in square brackets (e.g., [e2e4]).
+      
+      Current board state:
+      {board}
+      
+      Piece positions:
+      {piece_positions}
+
+      Valid moves:
+      {valid_moves}
+      
+      Recent moves:
+      {past_up_to_five_moves}
+      
+      Remember you are playing as {role} in the game of Chess, with small letters representing black pieces and capital letters representing white pieces. Make sure your moves are legal moves in the current board state.
+
+      First, reason about possible moves to optimize your chances of winning. Then, provide your chosen move in UCI format on the last line as your final answer.
+
+

@@ -1,0 +1,41 @@
+game:
+  num_players: 2
+  stop_after: 100
+
+agent0:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4o-mini"
+    params:
+      temperature: 0.2
+      max_tokens: 16
+  prompts:
+    system_prompt: |
+      You are a chess player. Output exactly one legal move in UCI format enclosed in square brackets.
+    step_wise_prompt: |
+      [GAME] You are playing as {role}. Output one legal move in square brackets (e.g., [e2e4]) and nothing else.
+      Current board state:
+      {board}
+      Valid moves:
+      {valid_moves}
+      Recent moves:
+      {past_up_to_five_moves}
+
+agent1:
+  model:
+    provider: "OpenAI"
+    name: "gpt-4.1-mini"
+    params:
+      temperature: 0.2
+      max_tokens: 16
+  prompts:
+    system_prompt: |
+      You are a chess player. Output exactly one legal move in UCI format enclosed in square brackets.
+    step_wise_prompt: |
+      [GAME] You are playing as {role}. Output one legal move in square brackets (e.g., [e7e5]) and nothing else.
+      Current board state:
+      {board}
+      Valid moves:
+      {valid_moves}
+      Recent moves:
+      {past_up_to_five_moves}
