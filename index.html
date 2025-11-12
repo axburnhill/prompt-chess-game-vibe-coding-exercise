@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Game Tournament Results</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🏆 Prompt Game Tournament Results</h1>
+            <p class="subtitle">Interactive Tournament Leaderboard & Statistics</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Controls Section -->
+        <section class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search players...">
+            </div>
+            <div class="filter-buttons">
+                <button class="btn active" onclick="showSection('leaderboard')">Leaderboard</button>
+                <button class="btn" onclick="showSection('statistics')">Statistics</button>
+                <button class="btn" onclick="showSection('comparison')">Compare Players</button>
+            </div>
+        </section>
+
+        <!-- Leaderboard Section -->
+        <section id="leaderboard-section" class="section active">
+            <h2>Tournament Leaderboard</h2>
+            <div class="table-controls">
+                <div class="sort-info">Click column headers to sort</div>
+                <button class="btn-secondary" onclick="exportToCSV()">Export Results</button>
+            </div>
+            <div class="table-container">
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable('Rank')">Rank <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Player')">Player <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Rating_Mu')">Rating (μ) <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Rating_Sigma')">Uncertainty (σ) <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Wins')">Wins <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Draws')">Draws <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Losses')">Losses <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Games')">Games <span class="sort-icon">↕</span></th>
+                            <th onclick="sortTable('Win_Rate')">Win Rate <span class="sort-icon">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        <!-- Data will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Statistics Section -->
+        <section id="statistics-section" class="section">
+            <h2>Tournament Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>Win Rate Distribution</h3>
+                    <canvas id="winRateChart"></canvas>
+                </div>
+                <div class="stat-card">
+                    <h3>Rating Distribution</h3>
+                    <canvas id="ratingChart"></canvas>
+                </div>
+                <div class="stat-card">
+                    <h3>Game Statistics</h3>
+                    <canvas id="gameStatsChart"></canvas>
+                </div>
+                <div class="stat-card">
+                    <h3>Top 10 Players by Win Rate</h3>
+                    <canvas id="topPlayersChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Comparison Section -->
+        <section id="comparison-section" class="section">
+            <h2>Player Comparison</h2>
+            <div class="comparison-controls">
+                <div class="player-select">
+                    <label for="player1Select">Player 1:</label>
+                    <select id="player1Select" onchange="updateComparison()">
+                        <option value="">Select a player...</option>
+                    </select>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="player-select">
+                    <label for="player2Select">Player 2:</label>
+                    <select id="player2Select" onchange="updateComparison()">
+                        <option value="">Select a player...</option>
+                    </select>
+                </div>
+            </div>
+            <div id="comparison-result" class="comparison-result">
+                <p class="placeholder-text">Select two players to compare their statistics</p>
+            </div>
+        </section>
+
+        <!-- Player Detail Modal -->
+        <div id="playerModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div id="playerDetails"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>Prompt Game Tournament Results &copy; 2024</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
